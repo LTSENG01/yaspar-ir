@@ -583,7 +583,7 @@ impl Context {
     /// Get all the symbols with a definition body
     ///
     /// This function is different from [Self::user_defined_symbols] in that it only returns the symbols
-    /// defined through `define-const` or `define-fun`.
+    /// defined through `define-const` or `define-fun` or datatype testers of the form `is-X`.
     pub fn defined_symbols(&self) -> HashSet<Str> {
         self.frame
             .symbol_table
@@ -592,7 +592,14 @@ impl Context {
                 // scan all signatures for one that has a defined body
                 sigs.iter()
                     .filter_map(|(_, def)| {
-                        if matches!(def, FunctionMeta::Defined { .. }) {
+                        if matches!(
+                            def,
+                            FunctionMeta::Defined { .. }
+                                | FunctionMeta::Datatype {
+                                    kind: DatatypeFunction::TesterDefined(_),
+                                    ..
+                                }
+                        ) {
                             Some(name.clone())
                         } else {
                             None
